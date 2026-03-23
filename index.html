@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>כל היחידות הקשב!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="glass-panel main-menu">
+                <div class="badge-icon">🎖️</div>
+                <h1 class="glow-text">כל היחידות הקשב!</h1>
+                <p class="description">יוצגו לפניכם סמלי יחידות בצה"ל, ועליכם לכתוב את שמות היחידות נכונה.<br>מוכנים? 90 שניות זוז!</p>
+                
+                <div class="leaderboard-section">
+                    <h3>🏆 10 הגדולים</h3>
+                    <ul id="start-leaderboard" class="leaderboard-list">
+                        <li>טוען נתונים...</li>
+                    </ul>
+                </div>
+                
+                <button id="start-btn" class="primary-btn pulse">התחל משחק</button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="header glass-panel">
+                <div class="timer">
+                    ⏳ <span id="time-left">90</span> שניות
+                </div>
+                <div class="score-display">
+                    ניקוד: <span id="current-score">0</span>
+                </div>
+                <button id="skip-btn" class="secondary-btn">דלג ⏭️ (-5 ש')</button>
+            </div>
+            
+            <div class="card-container">
+                <div class="card glass-panel" id="image-card">
+                    <!-- Image will be displayed here, or alt text if it's missing -->
+                    <img id="unit-image" src="" alt="סמל יחידה" onerror="this.src=''; this.alt='[חסרה תמונה - נא להוסיף לתיקיית images]'">
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div id="boxes-container"></div>
+            </div>
+            <p id="feedback-msg" class="hidden"></p>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="screen">
+            <div class="glass-panel endgame">
+                <h2 class="glow-text">הזמן עבר!</h2>
+                <div class="score-board">
+                    <p>כל הכבוד, זיהיתם נכונה:</p>
+                    <div class="final-score-circle">
+                        <span id="final-score">0</span>
+                    </div>
+                    <p>יחידות צבא!</p>
+                </div>
+
+                <div id="new-highscore-section" class="hidden">
+                    <h3 class="highlight-text">🎉 שברתם שיא! 🎉</h3>
+                    <p>הגעתם לרשימת 10 הגדולים!</p>
+                    <input type="text" id="player-name-input" placeholder="הכנס את שמך" maxlength="15">
+                    <button id="submit-score-btn" class="action-btn">שמור שיא</button>
+                </div>
+
+                <div id="end-leaderboard-section" class="hidden">
+                    <h3>🏆 טבלת האלופים</h3>
+                    <ul id="end-leaderboard" class="leaderboard-list"></ul>
+                </div>
+
+                <button id="restart-btn" class="primary-btn">שחק שוב 🔄</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script module to use Firebase -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
