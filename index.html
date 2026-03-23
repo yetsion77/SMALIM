@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Start Screen -->
@@ -14,15 +16,16 @@
             <div class="glass-panel main-menu">
                 <div class="badge-icon">🎖️</div>
                 <h1 class="glow-text">כל היחידות הקשב!</h1>
-                <p class="description">יוצגו לפניכם סמלי יחידות בצה"ל, ועליכם לכתוב את שמות היחידות נכונה.<br>מוכנים? 90 שניות זוז!</p>
-                
+                <p class="description">מכירים את צה"ל? את כל האוגדות, החטיבות, הגדודים, היחידות?<br>קדימה, 90 שניות זוז!
+                </p>
+
                 <div class="leaderboard-section">
                     <h3>🏆 10 הגדולים</h3>
                     <ul id="start-leaderboard" class="leaderboard-list">
                         <li>טוען נתונים...</li>
                     </ul>
                 </div>
-                
+
                 <button id="start-btn" class="primary-btn pulse">התחל משחק</button>
             </div>
         </div>
@@ -38,11 +41,12 @@
                 </div>
                 <button id="skip-btn" class="secondary-btn">דלג ⏭️ (-5 ש')</button>
             </div>
-            
+
             <div class="card-container">
                 <div class="card glass-panel" id="image-card">
                     <!-- Image will be displayed here, or alt text if it's missing -->
-                    <img id="unit-image" src="" alt="סמל יחידה" onerror="this.src=''; this.alt='[חסרה תמונה - נא להוסיף לתיקיית images]'">
+                    <img id="unit-image" src="" alt="סמל יחידה"
+                        onerror="this.src=''; this.alt='[חסרה תמונה - נא להוסיף לתיקיית images]'">
                 </div>
             </div>
 
@@ -80,8 +84,9 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Script module to use Firebase -->
     <script type="module" src="script.js"></script>
 </body>
+
 </html>

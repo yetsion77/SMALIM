@@ -147,7 +147,7 @@ button {
 
 /* Leaderboard */
 .leaderboard-section {
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 15px;
     padding: 15px;
     margin-bottom: 25px;
@@ -168,7 +168,7 @@ button {
 }
 
 .leaderboard-list li {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     margin-bottom: 5px;
     padding: 8px 12px;
     border-radius: 8px;
@@ -176,8 +176,16 @@ button {
     justify-content: space-between;
     font-weight: 500;
 }
-.leaderboard-list li span.rank { margin-left: 10px; color: var(--gold); }
-.leaderboard-list li span.score { font-weight: bold; color: var(--success); }
+
+.leaderboard-list li span.rank {
+    margin-left: 10px;
+    color: var(--gold);
+}
+
+.leaderboard-list li span.score {
+    font-weight: bold;
+    color: var(--success);
+}
 
 /* Game Screen */
 .header {
@@ -225,7 +233,7 @@ button {
     max-width: 90%;
     max-height: 90%;
     object-fit: contain;
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.6));
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.6));
 }
 
 .card.bounce-in {
@@ -242,8 +250,17 @@ button {
     display: flex;
     gap: 8px;
     justify-content: center;
-    direction: ltr; /* Keeping visual flex flow predictable while Hebrew typing */
+    direction: rtl;
+    /* Real RTL for fluent typing */
     flex-wrap: wrap;
+}
+
+.box.spacer {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    width: 25px;
+    pointer-events: none;
 }
 
 .box {
@@ -258,7 +275,7 @@ button {
     color: var(--gold);
     transition: all 0.2s;
     font-family: inherit;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .box:focus {
@@ -291,7 +308,7 @@ button {
     justify-content: center;
     align-items: center;
     margin: 15px auto;
-    border: 4px solid rgba(255,255,255,0.2);
+    border: 4px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 0 20px var(--gold-glow);
 }
 
@@ -306,58 +323,142 @@ button {
     font-size: 1.1rem;
     border-radius: 10px;
     border: 1px solid var(--gold);
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     color: white;
     text-align: center;
     font-family: inherit;
     width: 80%;
     margin-bottom: 10px;
 }
+
 #player-name-input:focus {
     outline: none;
     box-shadow: 0 0 10px var(--gold-glow);
 }
 
-.hidden { display: none !important; }
+.hidden {
+    display: none !important;
+}
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px;}
-::-webkit-scrollbar-thumb { background: var(--olive-light); border-radius: 10px;}
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--olive-light);
+    border-radius: 10px;
+}
 
 /* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
 @keyframes popIn {
-    0% { transform: scale(0.7); opacity: 0; }
-    70% { transform: scale(1.05); }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
+
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
 }
+
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    50% { transform: translateX(6px); }
-    75% { transform: translateX(-6px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-6px);
+    }
+
+    50% {
+        transform: translateX(6px);
+    }
+
+    75% {
+        transform: translateX(-6px);
+    }
 }
+
 @keyframes pulseWarn {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
 }
-.pulse { animation: pulseShadow 2s infinite; }
+
+.pulse {
+    animation: pulseShadow 2s infinite;
+}
+
 @keyframes pulseShadow {
-    0% { box-shadow: 0 0 0 0 var(--gold-glow); }
-    70% { box-shadow: 0 0 0 15px rgba(223, 183, 70, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(223, 183, 70, 0); }
+    0% {
+        box-shadow: 0 0 0 0 var(--gold-glow);
+    }
+
+    70% {
+        box-shadow: 0 0 0 15px rgba(223, 183, 70, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(223, 183, 70, 0);
+    }
 }
 
 @media (max-width: 480px) {
-    .box { width: 40px; height: 50px; font-size: 1.5rem; }
-    .glow-text { font-size: 1.8rem; }
-    .card { width: 180px; height: 180px; }
+    .box {
+        width: 40px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .glow-text {
+        font-size: 1.8rem;
+    }
+
+    .card {
+        width: 180px;
+        height: 180px;
+    }
 }

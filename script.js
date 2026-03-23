@@ -18,14 +18,24 @@ const db = getDatabase(app);
 
 // Game Data structure - Add actual files to the images/ folder!
 const unitsData = [
+    { id: '188', name: '188', image: '188.PNG' },
+    { id: '401', name: '401', image: '401.png' },
+    { id: 'modiin', name: 'אגף המודיעין', image: 'אגף המודיעין.png' },
+    { id: 'tikshuv', name: 'אגף התקשוב', image: 'אגף התקשוב.png' },
+    { id: 'alexandroni', name: 'אלכסנדרוני', image: 'אלכסנדרוני.png' },
     { id: 'bahad1', name: 'בהד 1', image: 'בהד 1.png' },
     { id: 'givati', name: 'גבעתי', image: 'גבעתי.png' },
     { id: 'golani', name: 'גולני', image: 'גולני.png' },
-    { id: 'kommando', name: 'הקומנדו', image: 'הקומנדו.png' },
+    { id: 'handasa', name: 'הנדסה קרבית', image: 'הנדסה קרבית.png' },
+    { id: 'kommando', name: 'קומנדו', image: 'הקומנדו.png' },
+    { id: 'hinuch', name: 'חיל החינוך', image: 'חיל החינוך.png' },
+    { id: 'refua', name: 'חיל הרפואה', image: 'חיל הרפואה.png' },
     { id: 'hashmonaim', name: 'חשמונאים', image: 'חשמונאים.jpg' },
     { id: 'kfir', name: 'כפיר', image: 'כפיר.png' },
+    { id: 'mishtara', name: 'משטרה צבאית', image: 'משטרה צבאית.png' },
     { id: 'nahal', name: 'נחל', image: 'נחל.png' },
     { id: 'tzanhanim', name: 'צנחנים', image: 'צנחנים.png' },
+    { id: 'rochev', name: 'רוכב שמיים', image: 'רוכב שמיים.png' },
     { id: 'refaim', name: 'רפאים', image: 'רפאים.png' }
 ];
 
@@ -199,8 +209,6 @@ function loadNextUnit() {
 
 function createInputBoxes(word) {
     UI.boxesContainer.innerHTML = '';
-    // Because DOM default is LTR for the container to keep logic simple, 
-    // but word matching needs to be correct. We'll render boxes exactly as the index.
 
     for (let i = 0; i < word.length; i++) {
         const box = document.createElement('input');
@@ -209,17 +217,44 @@ function createInputBoxes(word) {
         box.className = "box";
         box.dataset.index = i;
 
-        box.addEventListener('input', handleBoxInput);
-        box.addEventListener('keydown', handleBoxKeydown);
+        if (word[i] === ' ') {
+            box.disabled = true;
+            box.classList.add('spacer');
+        } else {
+            box.addEventListener('input', handleBoxInput);
+            box.addEventListener('keydown', handleBoxKeydown);
+        }
 
         UI.boxesContainer.appendChild(box);
     }
 
-    // Auto focus first (in visual RTL, index 0 is on the right)
+    // Auto focus first
     setTimeout(() => {
-        const firstBox = UI.boxesContainer.querySelector('.box');
+        const firstBox = UI.boxesContainer.querySelector('.box:not(.spacer)');
         if (firstBox) firstBox.focus();
     }, 100);
+}
+
+function focusNextBox(box) {
+    let next = box.nextElementSibling;
+    while (next && next.classList.contains('spacer')) {
+        next = next.nextElementSibling;
+    }
+    if (next) {
+        next.focus();
+    } else {
+        checkWord();
+    }
+}
+
+function focusPrevBox(box) {
+    let prev = box.previousElementSibling;
+    while (prev && prev.classList.contains('spacer')) {
+        prev = prev.previousElementSibling;
+    }
+    if (prev) {
+        prev.focus();
+    }
 }
 
 function handleBoxInput(e) {
@@ -228,29 +263,23 @@ function handleBoxInput(e) {
     box.value = box.value.replace(/[^א-ת" \-0-9]/g, '');
 
     if (box.value.length === 1) {
-        const next = box.nextElementSibling;
-        if (next) {
-            next.focus();
-        } else {
-            checkWord();
-        }
+        focusNextBox(box);
     }
 }
 
 function handleBoxKeydown(e) {
     const box = e.target;
     if (e.key === 'Backspace' && box.value === '') {
-        const prev = box.previousElementSibling;
-        if (prev) {
-            prev.focus();
-        }
+        focusPrevBox(box);
     }
 }
 
 function checkWord() {
     const boxes = document.querySelectorAll('.box');
     let userWord = "";
-    boxes.forEach(b => userWord += b.value);
+    boxes.forEach(b => {
+        userWord += b.classList.contains('spacer') ? " " : b.value;
+    });
 
     if (userWord === currentWord) {
         // Correct
