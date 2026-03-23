@@ -25,6 +25,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
 }
 
@@ -32,6 +33,7 @@ body {
     width: 100%;
     max-width: 600px;
     height: 100vh;
+    height: 100dvh;
     position: relative;
     padding: 20px;
     display: flex;
@@ -491,7 +493,18 @@ button {
 
 @media (max-width: 480px) {
     .app-container {
+        padding: 5px;
+        padding-top: 25px;
+        justify-content: flex-start;
+    }
+    
+    .header {
+        margin-bottom: 12px;
         padding: 10px;
+    }
+
+    .card-container {
+        margin-bottom: 20px;
     }
 
     .box {
@@ -505,8 +518,8 @@ button {
     }
 
     .card {
-        width: 160px;
-        height: 160px;
+        width: 140px;
+        height: 140px;
     }
 
     #boxes-container {

@@ -261,6 +261,11 @@ function createInputBoxes(word) {
         const wordDiv = document.createElement('div');
         wordDiv.className = 'word-group';
         
+        // Ensure pure numbers are displayed left-to-right visually
+        if (/^[0-9]+$/.test(w)) {
+            wordDiv.style.direction = 'ltr';
+        }
+        
         for (let i = 0; i < w.length; i++) {
             const box = document.createElement('div');
             box.className = "box";
