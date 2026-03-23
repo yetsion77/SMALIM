@@ -70,8 +70,19 @@ const UI = {
     endLeaderboard: document.getElementById('end-leaderboard'),
     newHSSection: document.getElementById('new-highscore-section'),
     endHSSection: document.getElementById('end-leaderboard-section'),
-    playerNameInput: document.getElementById('player-name-input')
+    playerNameInput: document.getElementById('player-name-input'),
+    hiddenInput: document.getElementById('hidden-input')
 };
+
+let currentWordBoxes = [];
+
+// Track clicks on game screen to keep the hidden input focused
+screens.game.addEventListener('click', () => {
+    if (screens.game.classList.contains('active')) {
+        UI.hiddenInput.focus();
+    }
+});
+
 
 // --- Leaderboard Logic ---
 async function fetchLeaderboard() {
@@ -91,8 +102,11 @@ async function fetchLeaderboard() {
         topScoresCache = scoresArray;
         renderLeaderboard(UI.startLeaderboard, scoresArray);
     } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-        UI.startLeaderboard.innerHTML = "<li>שגיאה בטעינת הנתונים</li>";
+        console.error("Error fetching leaderboard from Firebase:", error);
+        // Fallback to local storage if Firebase fails (e.g., rules expired)
+        const localScores = JSON.parse(localStorage.getItem('smalim_leaderboard')) || [];
+        topScoresCache = localScores;
+        renderLeaderboard(UI.startLeaderboard, localScores);
     }
 }
 
@@ -105,7 +119,9 @@ function renderLeaderboard(listElement, scores) {
 
     scores.forEach((s, index) => {
         const li = document.createElement('li');
-        li.innerHTML = `<div><span class="rank">#${index + 1}</span> ${s.name}</div><span class="score">${s.score} נ"ק</span>`;
+        // Prevent simple XSS
+        const safeName = s.name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        li.innerHTML = `<div><span class="rank">#${index + 1}</span> ${safeName}</div><span class="score">${s.score} נ"ק</span>`;
         listElement.appendChild(li);
     });
 }
@@ -144,10 +160,19 @@ UI.submitScoreBtn.addEventListener('click', async () => {
         UI.endHSSection.classList.remove('hidden');
         renderLeaderboard(UI.endLeaderboard, topScoresCache);
     } catch (error) {
-        console.error("Error saving score", error);
-        alert("שגיאה בשמירת השיא.");
-        UI.submitScoreBtn.disabled = false;
-        UI.submitScoreBtn.innerText = "שמור שיא";
+        console.error("Error saving score to Firebase:", error);
+        // Fallback to local storage
+        const localScores = JSON.parse(localStorage.getItem('smalim_leaderboard')) || [];
+        localScores.push({ name, score, timestamp: Date.now() });
+        localScores.sort((a, b) => b.score - a.score);
+        const top10 = localScores.slice(0, 10);
+        localStorage.setItem('smalim_leaderboard', JSON.stringify(top10));
+        
+        topScoresCache = top10;
+        
+        UI.newHSSection.classList.add('hidden');
+        UI.endHSSection.classList.remove('hidden');
+        renderLeaderboard(UI.endLeaderboard, topScoresCache);
     }
 });
 
@@ -168,6 +193,9 @@ function startGame() {
 
     switchScreen('game');
     loadNextUnit();
+
+    // Ensure hidden input is focused when game starts
+    setTimeout(() => UI.hiddenInput.focus(), 100);
 
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
@@ -209,91 +237,90 @@ function loadNextUnit() {
 
 function createInputBoxes(word) {
     UI.boxesContainer.innerHTML = '';
+    currentWordBoxes = [];
+    
+    // Setup hidden input
+    UI.hiddenInput.value = '';
+    const cleanWord = word.replace(/ /g, '');
+    UI.hiddenInput.maxLength = cleanWord.length;
 
-    for (let i = 0; i < word.length; i++) {
-        const box = document.createElement('input');
-        box.type = "text";
-        box.maxLength = 1;
-        box.className = "box";
-        box.dataset.index = i;
-
-        if (word[i] === ' ') {
-            box.disabled = true;
-            box.classList.add('spacer');
-        } else {
-            box.addEventListener('input', handleBoxInput);
-            box.addEventListener('keydown', handleBoxKeydown);
+    const words = word.split(' ');
+    
+    words.forEach((w, wIndex) => {
+        const wordDiv = document.createElement('div');
+        wordDiv.className = 'word-group';
+        
+        for (let i = 0; i < w.length; i++) {
+            const box = document.createElement('div');
+            box.className = "box";
+            box.dataset.char = w[i];
+            
+            wordDiv.appendChild(box);
+            currentWordBoxes.push(box);
         }
+        
+        UI.boxesContainer.appendChild(wordDiv);
+        
+        // Add a visual space between words, but not an input box
+        if (wIndex < words.length - 1) {
+            const spaceBox = document.createElement('div');
+            spaceBox.className = "box spacer";
+            UI.boxesContainer.appendChild(spaceBox);
+        }
+    });
 
-        UI.boxesContainer.appendChild(box);
-    }
-
-    // Auto focus first
-    setTimeout(() => {
-        const firstBox = UI.boxesContainer.querySelector('.box:not(.spacer)');
-        if (firstBox) firstBox.focus();
-    }, 100);
+    // Make sure we are focused and synced visually
+    UI.hiddenInput.focus();
+    syncBoxesWithInput(UI.hiddenInput.value);
 }
 
-function focusNextBox(box) {
-    let next = box.nextElementSibling;
-    while (next && next.classList.contains('spacer')) {
-        next = next.nextElementSibling;
+UI.hiddenInput.addEventListener('input', (e) => {
+    // Keep only Hebrew letters, spaces, quotes, and numbers
+    let val = UI.hiddenInput.value.replace(/[^א-ת0-9"' \-]/g, '');
+    UI.hiddenInput.value = val;
+    syncBoxesWithInput(val);
+});
+
+function syncBoxesWithInput(val) {
+    // Fill text and update focus styles
+    for (let i = 0; i < currentWordBoxes.length; i++) {
+        const box = currentWordBoxes[i];
+        if (i < val.length) {
+            box.innerText = val[i];
+            box.classList.remove('focused');
+        } else {
+            box.innerText = '';
+            box.classList.remove('focused');
+        }
     }
-    if (next) {
-        next.focus();
-    } else {
+    
+    // Add focus styling to the current empty box
+    if (val.length < currentWordBoxes.length) {
+        currentWordBoxes[val.length].classList.add('focused');
+    }
+    
+    // If input is complete, check it
+    if (val.length === currentWordBoxes.length) {
         checkWord();
     }
 }
 
-function focusPrevBox(box) {
-    let prev = box.previousElementSibling;
-    while (prev && prev.classList.contains('spacer')) {
-        prev = prev.previousElementSibling;
-    }
-    if (prev) {
-        prev.focus();
-    }
-}
-
-function handleBoxInput(e) {
-    const box = e.target;
-    // Keep only Hebrew letters, spaces, quotes, and numbers
-    box.value = box.value.replace(/[^א-ת" \-0-9]/g, '');
-
-    if (box.value.length === 1) {
-        focusNextBox(box);
-    }
-}
-
-function handleBoxKeydown(e) {
-    const box = e.target;
-    if (e.key === 'Backspace' && box.value === '') {
-        focusPrevBox(box);
-    }
-}
-
 function checkWord() {
-    const boxes = document.querySelectorAll('.box');
-    let userWord = "";
-    boxes.forEach(b => {
-        userWord += b.classList.contains('spacer') ? " " : b.value;
-    });
+    const val = UI.hiddenInput.value;
+    const cleanCurrentWord = currentWord.replace(/ /g, '');
 
-    if (userWord === currentWord) {
+    if (val === cleanCurrentWord) {
         // Correct
-        boxes.forEach(b => b.classList.add('correct'));
+        currentWordBoxes.forEach(b => b.classList.add('correct'));
         score++;
         UI.currentScore.innerText = score;
 
-        // Wait 800ms to show correct state, then next
         setTimeout(() => {
             loadNextUnit();
         }, 800);
     } else {
         // Incorrect
-        boxes.forEach(b => {
+        currentWordBoxes.forEach(b => {
             b.classList.remove('error');
             void b.offsetWidth;
             b.classList.add('error');
