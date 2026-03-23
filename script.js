@@ -36,7 +36,18 @@ const unitsData = [
     { id: 'nahal', name: 'נחל', image: 'נחל.png' },
     { id: 'tzanhanim', name: 'צנחנים', image: 'צנחנים.png' },
     { id: 'rochev', name: 'רוכב שמיים', image: 'רוכב שמיים.png' },
-    { id: 'refaim', name: 'רפאים', image: 'רפאים.png' }
+    { id: 'refaim', name: 'רפאים', image: 'רפאים.png' },
+    { id: 'yoav', name: 'מגיני יואב', image: 'מגיני יואב.png' },
+    { id: '669', name: '669', image: '669.png' },
+    { id: 'egoz', name: 'אגוז', image: 'אגוז.png' },
+    { id: 'duvdevan', name: 'דובדבן', image: 'דובדבן.png' },
+    { id: 'yahalom', name: 'יהלום', image: 'יהלום.png' },
+    { id: 'maglan', name: 'מגלן', image: 'מגלן.png' },
+    { id: 'sayeret-golani', name: 'סיירת גולני', image: 'סיירת גולני.jpg' },
+    { id: 'sayeret-matkal', name: 'סיירת מטכל', image: 'סיירת מטכל.gif' },
+    { id: 'sayeret-tzanhanim', name: 'סיירת צנחנים', image: 'סיירת צנחנים.png' },
+    { id: 'shayetet-13', name: 'שייטת 13', image: 'שייטת 13.gif' },
+    { id: 'shaldag', name: 'שלדג', image: 'שלדג.gif' }
 ];
 
 // Game State
@@ -275,9 +286,14 @@ function createInputBoxes(word) {
 }
 
 UI.hiddenInput.addEventListener('input', (e) => {
-    // Keep only Hebrew letters, spaces, quotes, and numbers
-    let val = UI.hiddenInput.value.replace(/[^א-ת0-9"' \-]/g, '');
-    UI.hiddenInput.value = val;
+    let rawVal = UI.hiddenInput.value;
+    // Keep only Hebrew letters, quotes, digits, and hyphens. NO spaces.
+    let val = rawVal.replace(/[^א-ת0-9"'\-]/g, '');
+    
+    if (rawVal !== val) {
+        UI.hiddenInput.value = val;
+    }
+    
     syncBoxesWithInput(val);
 });
 
