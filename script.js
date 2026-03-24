@@ -98,28 +98,41 @@ screens.game.addEventListener('click', () => {
 
 // --- Leaderboard Logic ---
 async function fetchLeaderboard() {
+    let firebaseScores = [];
     try {
-        const scoresRef = query(ref(db, 'leaderboard'), orderByChild('score'), limitToLast(10));
+        const scoresRef = query(ref(db, 'smalim_leaderboard'), orderByChild('score'), limitToLast(10));
         const snapshot = await get(scoresRef);
-        let scoresArray = [];
-
+        
         if (snapshot.exists()) {
             snapshot.forEach((childSnapshot) => {
-                scoresArray.push(childSnapshot.val());
+                firebaseScores.push(childSnapshot.val());
             });
             // Reverse because orderByChild goes ascending
-            scoresArray.reverse();
+            firebaseScores.reverse();
         }
-
-        topScoresCache = scoresArray;
-        renderLeaderboard(UI.startLeaderboard, scoresArray);
     } catch (error) {
         console.error("Error fetching leaderboard from Firebase:", error);
-        // Fallback to local storage if Firebase fails (e.g., rules expired)
-        const localScores = JSON.parse(localStorage.getItem('smalim_leaderboard')) || [];
-        topScoresCache = localScores;
-        renderLeaderboard(UI.startLeaderboard, localScores);
     }
+
+    const localScores = JSON.parse(localStorage.getItem('smalim_leaderboard')) || [];
+    
+    // Merge Firebase and local scores safely
+    const allScores = [...firebaseScores, ...localScores];
+    const uniqueScores = [];
+    const seen = new Set();
+    
+    allScores.forEach(s => {
+        const key = `${s.name}-${s.score}-${s.timestamp}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueScores.push(s);
+        }
+    });
+
+    uniqueScores.sort((a, b) => b.score - a.score);
+    topScoresCache = uniqueScores.slice(0, 10);
+    
+    renderLeaderboard(UI.startLeaderboard, topScoresCache);
 }
 
 function renderLeaderboard(listElement, scores) {
@@ -151,37 +164,42 @@ async function handleHighscore() {
     }
 }
 
+UI.playerNameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        UI.submitScoreBtn.click();
+    }
+});
+
 UI.submitScoreBtn.addEventListener('click', async () => {
     const name = UI.playerNameInput.value.trim() || 'שחקן אנונימי';
     UI.submitScoreBtn.disabled = true;
     UI.submitScoreBtn.innerText = "שומר...";
 
+    const newScoreObj = {
+        name: name,
+        score: score,
+        timestamp: Date.now()
+    };
+
+    // Save locally first to guarantee it isn't lost
+    const localScores = JSON.parse(localStorage.getItem('smalim_leaderboard')) || [];
+    localScores.push(newScoreObj);
+    localScores.sort((a, b) => b.score - a.score);
+    localStorage.setItem('smalim_leaderboard', JSON.stringify(localScores.slice(0, 10)));
+
     try {
-        const lbRef = ref(db, 'leaderboard');
+        const lbRef = ref(db, 'smalim_leaderboard');
         const newScoreRef = push(lbRef);
-        await set(newScoreRef, {
-            name: name,
-            score: score,
-            timestamp: Date.now()
-        });
+        await set(newScoreRef, newScoreObj);
 
-        // Refresh cache
         await fetchLeaderboard();
-
         UI.newHSSection.classList.add('hidden');
         UI.endHSSection.classList.remove('hidden');
         renderLeaderboard(UI.endLeaderboard, topScoresCache);
     } catch (error) {
         console.error("Error saving score to Firebase:", error);
-        // Fallback to local storage
-        const localScores = JSON.parse(localStorage.getItem('smalim_leaderboard')) || [];
-        localScores.push({ name, score, timestamp: Date.now() });
-        localScores.sort((a, b) => b.score - a.score);
-        const top10 = localScores.slice(0, 10);
-        localStorage.setItem('smalim_leaderboard', JSON.stringify(top10));
         
-        topScoresCache = top10;
-        
+        await fetchLeaderboard();
         UI.newHSSection.classList.add('hidden');
         UI.endHSSection.classList.remove('hidden');
         renderLeaderboard(UI.endLeaderboard, topScoresCache);
@@ -315,10 +333,10 @@ function syncBoxesWithInput(val) {
         const box = currentWordBoxes[i];
         if (i < val.length) {
             box.innerText = val[i];
-            box.classList.remove('focused');
+            box.classList.remove('focused', 'error');
         } else {
             box.innerText = '';
-            box.classList.remove('focused');
+            box.classList.remove('focused', 'error');
         }
     }
     
@@ -354,6 +372,13 @@ function checkWord() {
             void b.offsetWidth;
             b.classList.add('error');
         });
+        
+        setTimeout(() => {
+            if (UI.hiddenInput.value === val && !isRevealing) {
+                UI.hiddenInput.value = '';
+                syncBoxesWithInput('');
+            }
+        }, 500);
     }
 }
 
