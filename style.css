@@ -324,6 +324,13 @@ button {
     animation: shake 0.4s ease-in-out;
 }
 
+.box.skipped {
+    border-color: var(--gold);
+    background: rgba(223, 183, 70, 0.2);
+    color: var(--gold);
+    box-shadow: 0 0 10px rgba(223, 183, 70, 0.4);
+}
+
 /* Endgame */
 .final-score-circle {
     width: 110px;

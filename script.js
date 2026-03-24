@@ -86,6 +86,7 @@ const UI = {
 };
 
 let currentWordBoxes = [];
+let isRevealing = false;
 
 // Track clicks on game screen to keep the hidden input focused
 screens.game.addEventListener('click', () => {
@@ -287,10 +288,16 @@ function createInputBoxes(word) {
 
     // Make sure we are focused and synced visually
     UI.hiddenInput.focus();
+    isRevealing = false;
     syncBoxesWithInput(UI.hiddenInput.value);
 }
 
 UI.hiddenInput.addEventListener('input', (e) => {
+    if (isRevealing) {
+        UI.hiddenInput.value = '';
+        return;
+    }
+    
     let rawVal = UI.hiddenInput.value;
     // Keep only Hebrew letters, quotes, digits, and hyphens. NO spaces.
     let val = rawVal.replace(/[^א-ת0-9"'\-]/g, '');
@@ -336,6 +343,7 @@ function checkWord() {
         score++;
         UI.currentScore.innerText = score;
 
+        isRevealing = true;
         setTimeout(() => {
             loadNextUnit();
         }, 800);
@@ -367,13 +375,30 @@ function endGame() {
 UI.startBtn.addEventListener('click', startGame);
 UI.restartBtn.addEventListener('click', startGame);
 UI.skipBtn.addEventListener('click', () => {
+    if (isRevealing) return;
+    isRevealing = true;
+    
     timeLeft -= 5;
-    if (timeLeft <= 0) {
-        endGame();
-    } else {
-        updateTimerDisplay();
-        loadNextUnit();
+    updateTimerDisplay();
+
+    // Reveal correct answer
+    const cleanWord = currentWord.replace(/ /g, '');
+    UI.hiddenInput.value = ''; // Reset input to prevent conflicts
+    
+    for (let i = 0; i < currentWordBoxes.length; i++) {
+        currentWordBoxes[i].innerText = cleanWord[i];
+        currentWordBoxes[i].classList.remove('error', 'focused');
+        currentWordBoxes[i].classList.add('skipped');
     }
+
+    setTimeout(() => {
+        isRevealing = false;
+        if (timeLeft <= 0) {
+            endGame();
+        } else {
+            loadNextUnit();
+        }
+    }, 1200);
 });
 
 // Initialization
