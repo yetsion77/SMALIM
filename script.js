@@ -146,7 +146,7 @@ function renderLeaderboard(listElement, scores) {
         const li = document.createElement('li');
         // Prevent simple XSS
         const safeName = s.name.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        li.innerHTML = `<div><span class="rank">#${index + 1}</span> ${safeName}</div><span class="score">${s.score} נ"ק</span>`;
+        li.innerHTML = `<div><span class="rank">#${index + 1}</span> ${safeName}</div><span class="score">${s.score} נקודות</span>`;
         listElement.appendChild(li);
     });
 }
